@@ -4,8 +4,7 @@ fn solve_part1(input: &str) -> i32 {
     for line in input.lines() {
         let len: usize = line.len();
         let mut items_count = [0; 53];
-        let first_compartments = &line[0..(len / 2)];
-        let second_compartments = &line[(len / 2)..len];
+        let (first_compartments, second_compartments) = line.split_at(len / 2);
 
         for c in first_compartments.chars() {
             let char_priority: i32 = get_char_priority(c);
