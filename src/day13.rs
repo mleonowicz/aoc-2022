@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Ord, Eq)]
 enum List {
     Parent(Vec<List>),
     Value(i32)
@@ -18,24 +18,20 @@ impl List {
                 match c {
                     '[' => {
                         depth += 1;
-                        if depth == 1 {
-                            sublist_start = i;
-                        }
                     },
                     ']' => {
                         depth -= 1;
-                        if depth == 0 {
-                            children.push(List::parse_line(&line[sublist_start..i+1]))
-                        }
                     }
-                    ',' => (),
-                    _ => {
+                    ',' => {
                         if depth == 0 {
-                            children.push(List::parse_line(&line[i..i+1]));
+                            children.push(List::parse_line(&line[sublist_start..i]));
+                            sublist_start = i + 1;
                         }
-                    }
+                    },
+                    _ => ()
                 }
             }
+            children.push(List::parse_line(&line[sublist_start..]));
             List::Parent(children)
         }
         else {
@@ -70,4 +66,26 @@ fn solve_part1(input: &str) -> usize {
         }
     }
     sum
+}
+
+
+#[aoc(day13, part2)]
+fn solve_part2(input: &str) -> usize {
+    let mut parsed_input = input
+        .lines()
+        .filter(|l| !l.is_empty())
+        .map(|l| List::parse_line(l))
+        .collect::<Vec<List>>();
+
+    parsed_input.push(List::parse_line("[[2]]"));
+    parsed_input.push(List::parse_line("[[6]]"));
+    parsed_input.sort();
+
+    let mut res = 1;
+    for (i, line) in parsed_input.iter().enumerate() {
+        if *line == List::parse_line("[[2]]") || *line == List::parse_line("[[6]]") {
+            res *= i + 1;
+        }
+    }
+    res
 }
